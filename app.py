@@ -46,13 +46,17 @@ def fetch_engineered_dataset():
         provinces = ['Ontario', 'Quebec', 'British Columbia', 'Alberta', 'Manitoba', 'Saskatchewan']
         weights = [0.40, 0.23, 0.14, 0.11, 0.06, 0.06]
         df['Province'] = np.random.choice(provinces, size=len(df), p=weights)
+        
         geo_coords = {
             'Ontario': (43.6532, -79.3832), 'Quebec': (45.5017, -73.5673),
             'British Columbia': (49.2827, -123.1207), 'Alberta': (53.5461, -113.4938),
             'Manitoba': (49.8951, -97.1384), 'Saskatchewan': (52.1332, -106.6700)
         }
-        df['Latitude'] = df['Province'].map(lambda x: geo_coords[x] + np.random.uniform(-0.6, 0.6))
-        df['Longitude'] = df['Province'].map(lambda x: geo_coords[x] + np.random.uniform(-0.6, 0.6))
+        
+        # FIXED MATHEMATICAL OFFSETS FOR TUPLE MAP INDEXING
+        df['Latitude'] = df['Province'].map(lambda x: geo_coords[x][0] + np.random.uniform(-0.6, 0.6))
+        df['Longitude'] = df['Province'].map(lambda x: geo_coords[x][1] + np.random.uniform(-0.6, 0.6))
+        
         def calc_tier(score):
             if score >= 760: return 'Tier 1 - Super Prime'
             elif score >= 680: return 'Tier 2 - Prime'
@@ -71,7 +75,7 @@ target_risk = st.sidebar.multiselect("⚡ Select Underwriting Risk Tiers", optio
 
 filtered_df = df[(df['Province'].isin(target_provinces)) & (df['Risk_Segment'].isin(target_risk))]
 
-# 4. Premium Web App Header (Removed 'CA' string)
+# 4. Premium Web App Header
 st.markdown("""
     <div class='hero-banner' style='padding: 40px 30px; min-height: 160px; overflow: hidden; display: block;'>
         <div style='display: inline-block; background-color: rgba(255,255,255,0.18); padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: bold; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 12px;'>Financial Risk Division</div>
@@ -89,7 +93,7 @@ with tab_analytics:
 
     if len(filtered_df) > 0:
         total_apps = f"{len(filtered_df):,}"
-        gross_exposure = f"${filtered_df['loan_amnt'].sum():,}"
+        gross_exposure = f"${int(filtered_df['loan_amnt'].sum()):,}"
         weighted_credit = f"{int(filtered_df['Credit_Score'].mean())}"
         avg_dti = f"{filtered_df['DTI_Ratio'].mean():.1%}"
 
@@ -100,7 +104,6 @@ with tab_analytics:
 
         with col_left:
             st.markdown("### 🗺️ Geographic Asset Exposure Concentrations")
-            # Using server-safe 'road' styling (requires no Mapbox token keys)
             st.pydeck_chart(pdk.Deck(
                 map_style='road',
                 initial_view_state=pdk.ViewState(latitude=53.5, longitude=-97.0, zoom=3.4, pitch=0),
