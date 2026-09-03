@@ -10,17 +10,17 @@ st.set_page_config(layout="wide", page_title="Canadian Banking Analytics Portal"
 # Custom CSS Injector for modern webpage layout & Fork Toolbar Protection
 st.markdown("""
     <style>
-        /* CRITICAL PROTECTION OVERRIDE: Completely hides the Fork/Options toolbar menu */
-        #MainMenu, footer, header, [data-testid="stToolbar"], .stDeployButton, [data-testid="stDecoration"] {
+        /* CRITICAL PROTECTION OVERRIDE: Hides the Fork/Options toolbar menu */
+        #MainMenu, footer, header, .stDeployButton, [data-testid="stDecoration"] {
             display: none !important;
             visibility: hidden !important;
             height: 0px !important;
         }
         
-        /* Main Webpage Font Smoothness & Clean Background */
-        .main {
+        .stApp {
             background-color: #FAFAFB;
         }
+        
         /* Gradient Hero Banner */
         .hero-banner {
             background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%);
@@ -93,8 +93,8 @@ def fetch_engineered_dataset():
             'Manitoba': (49.8951, -97.1384), 'Saskatchewan': (52.1332, -106.6700)
         }
         
-        df['Latitude'] = df['Province'].map(lambda x: geo_coords[x][0] + np.random.uniform(-0.6, 0.6))
-        df['Longitude'] = df['Province'].map(lambda x: geo_coords[x][1] + np.random.uniform(-0.6, 0.6))
+        df['Latitude'] = df['Province'].map(lambda x: geo_coords[x] + np.random.uniform(-0.6, 0.6))
+        df['Longitude'] = df['Province'].map(lambda x: geo_coords[x] + np.random.uniform(-0.6, 0.6))
         
         def calc_tier(score):
             if score >= 760: return 'Tier 1 - Super Prime'
@@ -192,14 +192,14 @@ with tab_analytics:
                 data=label_df,
                 get_position='[Longitude, Latitude]',
                 get_text='Abbrev',
-                get_color=[30, 58, 138, 255],
+                get_color=,
                 get_size=14,
                 get_alignment_baseline='"center"',
                 get_text_anchor='"middle"',
-                background_color=[255, 255, 255, 210],
-                get_border_color=[180, 180, 180, 255],
+                background_color=,
+                get_border_color=,
                 get_border_width=1,
-                padding=[6, 10, 6, 10],
+                padding=,
                 billboard=True
             )
             
@@ -219,3 +219,4 @@ with tab_analytics:
 
     else:
         m1.markdown("<div class='premium-card'><div class='card-label'>Active Pipelines</div><div class='card-value'>0</div></div>", unsafe_allow_html=True)
+        m2.markdown("<div class='premium-card'><div class='card-label'>Gross Capital Outlay</div><div class='card-value'>$0</div></div>", unsafe_allow_html=True)
