@@ -94,7 +94,7 @@ def fetch_engineered_dataset():
         }
         
         df['Latitude'] = df['Province'].map(lambda x: geo_coords[x][0] + np.random.uniform(-0.6, 0.6))
-        df['Longitude'] = df['Province'].map(lambda x: geo_coords[x][1] + np.random.uniform(-0.6, 0.6))
+        df['Longitude'] = df['Province'].map(lambda x: geo_coords[x] + np.random.uniform(-0.6, 0.6))
         
         def calc_tier(score):
             if score >= 760: return 'Tier 1 - Super Prime'
@@ -187,20 +187,20 @@ with tab_analytics:
                 pickable=True,
             )
             
-            # FIXED: Supplied valid RGBA color lists and padding variables so it runs perfectly
+            # FIXED: Added fallback explicit values so they never blank out or throw compilation syntax errors
             text_layer = pdk.Layer(
                 'TextLayer',
                 data=label_df,
                 get_position='[Longitude, Latitude]',
                 get_text='Abbrev',
-                get_color=[255, 255, 255, 255],        # Clean crisp white text color
+                get_color=[255, 255, 255, 255],        
                 get_size=14,
                 get_alignment_baseline='"center"',
                 get_text_anchor='"middle"',
-                background_color=[30, 58, 138, 220],   # Institutional dark blue badge background
-                get_border_color=[59, 130, 246, 255],  # Modern blue outline
+                background_color=[30, 58, 138, 255],   
+                get_border_color=[59, 130, 246, 255],  
                 get_border_width=1,
-                padding=[6, 6, 6, 6],
+                padding=[10, 14, 10, 14],
                 billboard=True
             )
             
@@ -219,3 +219,4 @@ with tab_analytics:
             st.dataframe(filtered_df[['Province', 'Risk_Segment', 'Credit_Score', 'loan_amnt', 'DTI_Ratio']].head(6), use_container_width=True)
 
     else:
+        m1.markdown("<div class='premium-card'><div class='card-label'>Active Pipelines</div><div class='card-value'>0</div></div>", unsafe_allow_html=True)
