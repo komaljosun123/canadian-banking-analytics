@@ -19,7 +19,7 @@ st.markdown("""
             background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%);
             border-radius: 16px;
             color: white;
-            margin-top: -40px; /* Pulls the banner flush to the top */
+            margin-top: -40px;
             margin-bottom: 30px;
             box-shadow: 0 10px 25px rgba(30, 58, 138, 0.15);
         }
@@ -67,8 +67,7 @@ def fetch_engineered_dataset():
     if os.path.exists(data_path):
         return pd.read_csv(data_path)
     else:
-        # Generate dummy data so your app functions flawlessly in class without the file
-        st.sidebar.warning("⚠️ Local dataset not found. Running on generated classroom sandbox data.")
+        st.sidebar.warning("⚠️ Local dataset not found. Running on sandbox data.")
         np.random.seed(42)
         provinces = ['ON', 'QC', 'BC', 'AB', 'MB', 'NS']
         risk_tiers = ['Low', 'Medium', 'High']
@@ -107,7 +106,7 @@ target_risk = st.sidebar.multiselect(
 # Compute runtime filtered dataset scoping matrix
 filtered_df = df[(df['Province'].isin(target_provinces)) & (df['Risk_Segment'].isin(target_risk))]
 
-# 4. Premium Web App Header with Structural Depth Protection (Removed 'CA' string)
+# 4. Premium Web App Header
 st.markdown("""
     <div class='hero-banner' style='padding: 40px 30px; min-height: 160px; overflow: hidden; display: block;'>
         <div style='display: inline-block; background-color: rgba(255,255,255,0.18); padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: bold; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 12px;'>
@@ -201,3 +200,8 @@ with tab_market:
             <div class='image-caption-box' style='border-left-color: #EF4444;'>
                 <div style='background: linear-gradient(135deg, #7F1D1D 0%, #EF4444 100%); height: 120px; border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px;'>🛡️ Risk Mitigate</div>
                 <h4 style='margin: 0 0 5px 0; color:#EF4444; font-size: 18px;'>Volatility Stress Indexing</h4>
+                <p style='margin: 0; color: #4B5563; font-size: 14px; line-height: 1.5;'>Hedges subprime concentration vectors dynamically to insulate capital books from macroeconomic trends.</p>
+            </div>
+        """, unsafe_allow_html=True)
+
+with tab_export:
