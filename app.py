@@ -1,4 +1,4 @@
-import streamlit as st
+import streamlit st
 import pandas as pd
 import pydeck as pdk
 import numpy as np
@@ -88,8 +88,9 @@ def fetch_engineered_dataset():
             'Manitoba': (49.8951, -97.1384), 'Saskatchewan': (52.1332, -106.6700)
         }
         
-        latitude_lookup = {k: v for k, v in geo_coords.items()}
-        longitude_lookup = {k: v for k, v in geo_coords.items()}
+        # FIXED: Extract individual tuple values cleanly (v[0] for lat, v[1] for lon)
+        latitude_lookup = {k: v[0] for k, v in geo_coords.items()}
+        longitude_lookup = {k: v[1] for k, v in geo_coords.items()}
         
         df['Latitude'] = df['Province'].map(latitude_lookup) + np.random.uniform(-0.6, 0.6, size=rows_count)
         df['Longitude'] = df['Province'].map(longitude_lookup) + np.random.uniform(-0.6, 0.6, size=rows_count)
@@ -211,5 +212,3 @@ with tab_analytics:
         with col_left:
             st.warning("⚠️ Active geographic parameters empty. Please select a Province to populate data layers.")
         with col_right:
-            st.warning("⚠️ Portfolio stream paused. Restore parameters in control deck to analyze graphs.")
-
