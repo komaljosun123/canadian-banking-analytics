@@ -126,9 +126,9 @@ with tab_analytics:
                 get_alignment_baseline='"center"',
                 get_text_anchor='"middle"',
                 background_color='[255, 255, 255, 200]', # Semi-transparent white box
-                get_border_color='[30, 58, 138, 100]',
+                get_border_color='[200, 200, 200, 255]',
                 get_border_width=1,
-                padding=[6, 6],
+                padding=[6, 10],
                 billboard=True
             )
             
