@@ -7,10 +7,10 @@ import os
 # 1. Page Configuration & Aesthetic Theme Layout
 st.set_page_config(layout="wide", page_title="Canadian Banking Analytics Portal", page_icon="🇨🇦")
 
-# Custom CSS Injector for modern webpage layout & Fork Protection
+# Custom CSS Injector for modern webpage layout & Fork Toolbar Protection
 st.markdown("""
     <style>
-        /* CRITICAL SECURITY OVERRIDE: Hides the Fork/Options toolbar entirely */
+        /* CRITICAL PROTECTION OVERRIDE: Completely hides the Fork/Options toolbar menu */
         #MainMenu, footer, header, [data-testid="stToolbar"], .stDeployButton, [data-testid="stDecoration"] {
             display: none !important;
             visibility: hidden !important;
@@ -74,7 +74,7 @@ def fetch_engineered_dataset():
     if os.path.exists(target_path):
         return pd.read_csv(target_path)
     else:
-        # Fallback Data Generator Engine matching your ETL script properties if pipeline hasn't run
+        # Fallback Dynamic Matrix Generator if clean production file is missing in repository branch
         np.random.seed(42)
         df = pd.DataFrame({
             'person_age': np.random.randint(20, 65, 1000),
@@ -169,43 +169,43 @@ with tab_analytics:
         with col_left:
             st.markdown("### 🗺️ Geographic Asset Exposure Concentrations")
             
-            # Map values to their two-letter postal code abbreviations
+            # Regional postal two-letter code dictionary mapping
             prov_abbrev = {
                 'Ontario': 'ON', 'Quebec': 'QC', 'British Columbia': 'BC',
                 'Alberta': 'AB', 'Manitoba': 'MB', 'Saskatchewan': 'SK'
             }
             
-            # Generate static centered midpoints and append the new abbrev column
+            # Map aggregated positions coordinates out for text placement anchors
             label_df = filtered_df.groupby('Province')[['Longitude', 'Latitude']].mean().reset_index()
             label_df['Abbrev'] = label_df['Province'].map(prov_abbrev)
             
             grid_layer = pdk.Layer(
-                'ScreenGridLayer', 
-                data=filtered_df, 
-                get_position='[Longitude, Latitude]', 
-                cell_size_pixels=22, 
-                pickable=True
+                'ScreenGridLayer',
+                data=filtered_df,
+                get_position='[Longitude, Latitude]',
+                cell_size_pixels=22,
+                pickable=True,
             )
             
             text_layer = pdk.Layer(
                 'TextLayer',
                 data=label_df,
                 get_position='[Longitude, Latitude]',
-                get_text='Abbrev',  # Target the abbreviation string column
+                get_text='Abbrev',
                 get_color=[30, 58, 138, 255],
                 get_size=14,
                 get_alignment_baseline='"center"',
                 get_text_anchor='"middle"',
-                background_color=[255, 255, 255, 220],
+                background_color=[255, 255, 255, 210],
                 get_border_color=[180, 180, 180, 255],
                 get_border_width=1,
-                padding=[6, 6, 6, 6],
+                padding=[6, 10, 6, 10],
                 billboard=True
             )
             
             st.pydeck_chart(pdk.Deck(
-                map_style='road',
-                initial_view_state=pdk.ViewState(latitude=53.5, longitude=-97.0, zoom=3.4, pitch=0),
+                map_style='mapbox://styles/mapbox/dark-v10',
+                initial_view_state=pdk.ViewState(latitude=53.5, longitude=-97.0, zoom=3.4, pitch=38),
                 layers=[grid_layer, text_layer],
             ))
 
