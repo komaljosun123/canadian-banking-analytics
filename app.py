@@ -3,7 +3,7 @@ import pandas as pd
 import pydeck as pdk
 
 # 1. Page Configuration & Aesthetic Theme Layout
-st.set_page_config(layout="wide", page_title="Canadian Banking Analytics Portal")
+st.set_page_config(layout="wide", page_title="Canadian Banking Analytics Portal", page_icon="🇨🇦")
 
 # Custom CSS Injector for modern webpage layout
 st.markdown("""
