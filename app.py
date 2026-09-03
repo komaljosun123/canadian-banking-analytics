@@ -162,8 +162,15 @@ with tab_analytics:
         with col_left:
             st.markdown("### 🗺️ Geographic Asset Exposure Concentrations")
             
-            # Generate static midpoints for each province to attach clean labels to
+            # Map values to their two-letter postal code abbreviations
+            prov_abbrev = {
+                'Ontario': 'ON', 'Quebec': 'QC', 'British Columbia': 'BC',
+                'Alberta': 'AB', 'Manitoba': 'MB', 'Saskatchewan': 'SK'
+            }
+            
+            # Generate static centered midpoints and append the new abbrev column
             label_df = filtered_df.groupby('Province')[['Longitude', 'Latitude']].mean().reset_index()
+            label_df['Abbrev'] = label_df['Province'].map(prov_abbrev)
             
             grid_layer = pdk.Layer(
                 'ScreenGridLayer', 
@@ -177,13 +184,13 @@ with tab_analytics:
                 'TextLayer',
                 data=label_df,
                 get_position='[Longitude, Latitude]',
-                get_text='Province',
+                get_text='Abbrev',  # Target the abbreviation string column
                 get_color=[30, 58, 138, 255],
-                get_size=15,
+                get_size=14,
                 get_alignment_baseline='"center"',
                 get_text_anchor='"middle"',
                 background_color=[255, 255, 255, 220],
-                get_border_color=[30, 58, 138, 255],
+                get_border_color=[180, 180, 180, 255],
                 get_border_width=1,
                 padding=[6, 10, 6, 10],
                 billboard=True
@@ -207,12 +214,3 @@ with tab_analytics:
         m1.markdown("<div class='premium-card'><div class='card-label'>Active Pipelines</div><div class='card-value'>0</div></div>", unsafe_allow_html=True)
         m2.markdown("<div class='premium-card'><div class='card-label'>Gross Capital Outlay</div><div class='card-value'>$0</div></div>", unsafe_allow_html=True)
         m3.markdown("<div class='premium-card'><div class='card-label'>Weighted Credit Mean</div><div class='card-value'>N/A</div></div>", unsafe_allow_html=True)
-        m4.markdown("<div class='premium-card'><div class='card-label'>Debt-To-Income (DTI)</div><div class='card-value'>0.0%</div></div>", unsafe_allow_html=True)
-        
-        with col_left:
-            st.warning("⚠️ Active geographic parameters empty. Please select a Province to populate data layers.")
-        with col_right:
-            st.warning("⚠️ Portfolio stream paused. Restore parameters in control deck to analyze graphs.")
-
-with tab_market:
-    st.markdown("### 🏢 Executive Workspace & Market Context")
