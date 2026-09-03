@@ -1,22 +1,14 @@
+
 import streamlit as st
 import pandas as pd
 import pydeck as pdk
-import numpy as np
-import os
 
 # 1. Page Configuration & Aesthetic Theme Layout
 st.set_page_config(layout="wide", page_title="Canadian Banking Analytics Portal", page_icon="🇨🇦")
 
-# Custom CSS Injector for modern webpage layout & Fork Protection
+# Custom CSS Injector for modern webpage layout
 st.markdown("""
     <style>
-        /* CRITICAL SECURITY OVERRIDE: Hides the Fork/Options toolbar entirely */
-        #MainMenu, footer, header, [data-testid="stToolbar"], .stDeployButton, [data-testid="stDecoration"] {
-            display: none !important;
-            visibility: hidden !important;
-            height: 0px !important;
-        }
-        
         /* Main Webpage Font Smoothness & Clean Background */
         .main {
             background-color: #FAFAFB;
@@ -67,44 +59,10 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 2. Performance Optimized Data Layer with Server-Safe Dynamic Engine
+# 2. Performance Optimized Data Layer
 @st.cache_data
 def fetch_engineered_dataset():
-    target_path = "data/clean_bank_data.csv"
-    if os.path.exists(target_path):
-        return pd.read_csv(target_path)
-    else:
-        # Fallback Data Generator Engine if file is missing in Repository
-        np.random.seed(42)
-        df = pd.DataFrame({
-            'person_age': np.random.randint(20, 65, 1000),
-            'person_income': np.random.randint(35000, 140000, 1000),
-            'loan_amnt': np.random.randint(5000, 42000, 1000),
-            'Credit_Score': np.random.randint(500, 850, size=1000),
-            'loan_intent': np.random.choice(['PERSONAL', 'EDUCATION', 'MEDICAL', 'VENTURE'], 1000)
-        })
-        provinces = ['Ontario', 'Quebec', 'British Columbia', 'Alberta', 'Manitoba', 'Saskatchewan']
-        weights = [0.40, 0.23, 0.14, 0.11, 0.06, 0.06]
-        df['Province'] = np.random.choice(provinces, size=len(df), p=weights)
-        
-        geo_coords = {
-            'Ontario': (43.6532, -79.3832), 'Quebec': (45.5017, -73.5673),
-            'British Columbia': (49.2827, -123.1207), 'Alberta': (53.5461, -113.4938),
-            'Manitoba': (49.8951, -97.1384), 'Saskatchewan': (52.1332, -106.6700)
-        }
-        
-        # CORRECTED: Added [0] and [1] index locations to unpack latitude and longitude coordinates safely
-        df['Latitude'] = df['Province'].map(lambda x: geo_coords[x][0] + np.random.uniform(-0.6, 0.6))
-        df['Longitude'] = df['Province'].map(lambda x: geo_coords[x][1] + np.random.uniform(-0.6, 0.6))
-        
-        def calc_tier(score):
-            if score >= 760: return 'Tier 1 - Super Prime'
-            elif score >= 680: return 'Tier 2 - Prime'
-            elif score >= 600: return 'Tier 3 - Near Prime'
-            return 'Tier 4 - Subprime'
-        df['Risk_Segment'] = df['Credit_Score'].apply(calc_tier)
-        df['DTI_Ratio'] = (df['loan_amnt'] / df['person_income']).round(3)
-        return df
+    return pd.read_csv("data/clean_bank_data.csv")
 
 df = fetch_engineered_dataset()
 
@@ -127,7 +85,7 @@ target_risk = st.sidebar.multiselect(
 # Compute runtime filtered dataset scoping matrix
 filtered_df = df[(df['Province'].isin(target_provinces)) & (df['Risk_Segment'].isin(target_risk))]
 
-# 4. Premium Web App Header with Structural Depth Protection
+# 4. Premium Web App Header with Structural Depth Protection (Removed 'CA' string)
 st.markdown("""
     <div class='hero-banner' style='padding: 40px 30px; min-height: 160px; overflow: hidden; display: block;'>
         <div style='display: inline-block; background-color: rgba(255,255,255,0.18); padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: bold; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 12px;'>
@@ -157,7 +115,7 @@ with tab_analytics:
     if len(filtered_df) > 0:
         # Calculate metric strings safely
         total_apps = f"{len(filtered_df):,}"
-        gross_exposure = f"${int(filtered_df['loan_amnt'].sum()):,}"
+        gross_exposure = f"${filtered_df['loan_amnt'].sum():,}"
         weighted_credit = f"{int(filtered_df['Credit_Score'].mean())}"
         avg_dti = f"{filtered_df['DTI_Ratio'].mean():.1%}"
 
@@ -169,45 +127,18 @@ with tab_analytics:
 
         with col_left:
             st.markdown("### 🗺️ Geographic Asset Exposure Concentrations")
-            
-            # Map values to their two-letter postal code abbreviations
-            prov_abbrev = {
-                'Ontario': 'ON', 'Quebec': 'QC', 'British Columbia': 'BC',
-                'Alberta': 'AB', 'Manitoba': 'MB', 'Saskatchewan': 'SK'
-            }
-            
-            # Generate static centered midpoints and append the new abbrev column
-            label_df = filtered_df.groupby('Province')[['Longitude', 'Latitude']].mean().reset_index()
-            label_df['Abbrev'] = label_df['Province'].map(prov_abbrev)
-            
-            grid_layer = pdk.Layer(
-                'ScreenGridLayer', 
-                data=filtered_df, 
-                get_position='[Longitude, Latitude]', 
-                cell_size_pixels=22, 
-                pickable=True
-            )
-            
-            text_layer = pdk.Layer(
-                'TextLayer',
-                data=label_df,
-                get_position='[Longitude, Latitude]',
-                get_text='Abbrev',  # Target the abbreviation string column
-                get_color=[30, 58, 138, 255],
-                get_size=14,
-                get_alignment_baseline='"center"',
-                get_text_anchor='"middle"',
-                background_color=[255, 255, 255, 220],
-                get_border_color=[107, 114, 128, 255],
-                get_border_width=1,
-                padding=[6, 10, 6, 10],
-                billboard=True
-            )
-            
             st.pydeck_chart(pdk.Deck(
-                map_style='road',
-                initial_view_state=pdk.ViewState(latitude=53.5, longitude=-97.0, zoom=3.4, pitch=0),
-                layers=[grid_layer, text_layer],
+                map_style='mapbox://styles/mapbox/dark-v10',
+                initial_view_state=pdk.ViewState(latitude=53.5, longitude=-97.0, zoom=3.4, pitch=38),
+                layers=[
+                    pdk.Layer(
+                        'ScreenGridLayer',
+                        data=filtered_df,
+                        get_position='[Longitude, Latitude]',
+                        cell_size_pixels=22,
+                        pickable=True,
+                    ),
+                ],
             ))
 
         with col_right:
@@ -220,3 +151,47 @@ with tab_analytics:
 
     else:
         m1.markdown("<div class='premium-card'><div class='card-label'>Active Pipelines</div><div class='card-value'>0</div></div>", unsafe_allow_html=True)
+        m2.markdown("<div class='premium-card'><div class='card-label'>Gross Capital Outlay</div><div class='card-value'>$0</div></div>", unsafe_allow_html=True)
+        m3.markdown("<div class='premium-card'><div class='card-label'>Weighted Credit Mean</div><div class='card-value'>N/A</div></div>", unsafe_allow_html=True)
+        m4.markdown("<div class='premium-card'><div class='card-label'>Debt-To-Income (DTI)</div><div class='card-value'>0.0%</div></div>", unsafe_allow_html=True)
+        
+        with col_left:
+            st.warning("⚠️ Active geographic parameters empty. Please select a Province to populate data layers.")
+        with col_right:
+            st.warning("⚠️ Portfolio stream paused. Restore parameters in control deck to analyze graphs.")
+
+with tab_market:
+    st.markdown("### 🏢 Executive Workspace & Market Context")
+    st.markdown("Macroeconomic overview matching underwriting parameters.")
+    
+    img_col1, img_col2 = st.columns(2)
+    
+    with img_col1:
+        st.markdown("""
+            <div class='image-caption-box'>
+                <div style='background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%); height: 120px; border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px;'>📊 Asset Control</div>
+                <h4 style='margin: 0 0 5px 0; color:#1E3A8A; font-size: 18px;'>Asset Refinement Protocols</h4>
+                <p style='margin: 0; color: #4B5563; font-size: 14px; line-height: 1.5;'>Commercial portfolio adjustments running in connection with current Bank of Canada credit lending standards.</p>
+            </div>
+        """, unsafe_allow_html=True)
+        
+    with img_col2:
+        st.markdown("""
+            <div class='image-caption-box' style='border-left-color: #EF4444;'>
+                <div style='background: linear-gradient(135deg, #7F1D1D 0%, #EF4444 100%); height: 120px; border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px;'>🛡️ Risk Mitigate</div>
+                <h4 style='margin: 0 0 5px 0; color:#EF4444; font-size: 18px;'>Volatility Stress Indexing</h4>
+                <p style='margin: 0; color: #4B5563; font-size: 14px; line-height: 1.5;'>Hedges subprime concentration vectors dynamically to insulate capital books from macroeconomic trends.</p>
+            </div>
+        """, unsafe_allow_html=True)
+
+with tab_export:
+    st.markdown("### 📥 Archive & Export Portal")
+    st.markdown("Extract current filtered states as structured compliance audit assets.")
+    
+    csv_buffer = filtered_df.to_csv(index=False).encode('utf-8')
+    st.download_button(
+        label="📥 Download Structured Risk Portfolio State (CSV)",
+        data=csv_buffer,
+        file_name="filtered_canadian_banking_manifest.csv",
+        mime="text/csv"
+    )
