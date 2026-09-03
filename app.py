@@ -88,7 +88,6 @@ def fetch_engineered_dataset():
             'Manitoba': (49.8951, -97.1384), 'Saskatchewan': (52.1332, -106.6700)
         }
         
-        # Bypasses lambda functions completely to protect coordinates from parsing truncation errors
         latitude_lookup = {k: v[0] for k, v in geo_coords.items()}
         longitude_lookup = {k: v[1] for k, v in geo_coords.items()}
         
@@ -213,3 +212,6 @@ with tab_analytics:
         with col_left:
             st.warning("⚠️ Active geographic parameters empty. Please select a Province to populate data layers.")
         with col_right:
+            st.warning("⚠️ Portfolio stream paused. Restore parameters in control deck to analyze graphs.")
+
+with tab_market:
