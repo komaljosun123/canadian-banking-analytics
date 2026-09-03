@@ -104,10 +104,38 @@ with tab_analytics:
 
         with col_left:
             st.markdown("### 🗺️ Geographic Asset Exposure Concentrations")
+            
+            # Generate static midpoints for each province to attach clean labels to
+            label_df = filtered_df.groupby('Province')[['Longitude', 'Latitude']].mean().reset_index()
+            
+            grid_layer = pdk.Layer(
+                'ScreenGridLayer', 
+                data=filtered_df, 
+                get_position='[Longitude, Latitude]', 
+                cell_size_pixels=22, 
+                pickable=True
+            )
+            
+            text_layer = pdk.Layer(
+                'TextLayer',
+                data=label_df,
+                get_position='[Longitude, Latitude]',
+                get_text='Province',
+                get_color='[30, 58, 138, 255]',  # Institutional deep blue
+                get_size=15,
+                get_alignment_baseline='"center"',
+                get_text_anchor='"middle"',
+                background_color='[255, 255, 255, 200]', # Semi-transparent white box
+                get_border_color='[30, 58, 138, 100]',
+                get_border_width=1,
+                padding=[6, 6],
+                billboard=True
+            )
+            
             st.pydeck_chart(pdk.Deck(
                 map_style='road',
                 initial_view_state=pdk.ViewState(latitude=53.5, longitude=-97.0, zoom=3.4, pitch=0),
-                layers=[pdk.Layer('ScreenGridLayer', data=filtered_df, get_position='[Longitude, Latitude]', cell_size_pixels=22, pickable=True)],
+                layers=[grid_layer, text_layer],
             ))
 
         with col_right:
@@ -128,9 +156,3 @@ with tab_market:
     with img_col1:
         st.markdown("<div class='image-caption-box'><div style='background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%); height: 120px; border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px;'>📊 Asset Control</div><h4 style='margin: 0 0 5px 0; color:#1E3A8A; font-size: 18px;'>Asset Refinement Protocols</h4><p style='margin: 0; color: #4B5563; font-size: 14px; line-height: 1.5;'>Commercial portfolio adjustments running in connection with current Bank of Canada credit lending standards.</p></div>", unsafe_allow_html=True)
     with img_col2:
-        st.markdown("<div class='image-caption-box' style='border-left-color: #EF4444;'><div style='background: linear-gradient(135deg, #7F1D1D 0%, #EF4444 100%); height: 120px; border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px;'>🛡️ Risk Mitigate</div><h4 style='margin: 0 0 5px 0; color:#EF4444; font-size: 18px;'>Volatility Stress Indexing</h4><p style='margin: 0; color: #4B5563; font-size: 14px; line-height: 1.5;'>Hedges subprime concentration vectors dynamically to insulate capital books from macroeconomic trends.</p></div>", unsafe_allow_html=True)
-
-with tab_export:
-    st.markdown("### 📥 Archive & Export Portal")
-    csv_buffer = filtered_df.to_csv(index=False).encode('utf-8')
-    st.download_button(label="📥 Download Structured Risk Portfolio State (CSV)", data=csv_buffer, file_name="filtered_canadian_banking_manifest.csv", mime="text/csv")
