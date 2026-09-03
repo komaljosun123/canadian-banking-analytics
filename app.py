@@ -10,27 +10,23 @@ st.set_page_config(layout="wide", page_title="Canadian Banking Analytics Portal"
 # Custom CSS Injector for modern webpage layout & Fork Toolbar Protection
 st.markdown("""
     <style>
-        /* CRITICAL PROTECTION OVERRIDE: Hides the Fork/Options toolbar menu */
+        /* Hides the default developer toolbar menus cleanly */
         #MainMenu, footer, header, .stDeployButton, [data-testid="stDecoration"] {
             display: none !important;
             visibility: hidden !important;
             height: 0px !important;
         }
-        
         .stApp {
             background-color: #FAFAFB;
         }
-        
-        /* Gradient Hero Banner */
         .hero-banner {
             background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%);
             border-radius: 16px;
             color: white;
-            margin-top: -40px; /* Pulls the banner flush to the top */
+            margin-top: -40px;
             margin-bottom: 30px;
             box-shadow: 0 10px 25px rgba(30, 58, 138, 0.15);
         }
-        /* Luxury Styled Metric Cards */
         .premium-card {
             background-color: #FFFFFF;
             border-top: 4px solid #3B82F6;
@@ -56,7 +52,6 @@ st.markdown("""
             color: #1F2937;
             margin-top: 8px;
         }
-        /* Image Card Container */
         .image-caption-box {
             background-color: #FFFFFF;
             padding: 20px;
@@ -74,18 +69,18 @@ def fetch_engineered_dataset():
     if os.path.exists(target_path):
         return pd.read_csv(target_path)
     else:
-        # Fallback Dynamic Matrix Generator if clean production file is missing in repository branch
         np.random.seed(42)
+        rows_count = 1000
         df = pd.DataFrame({
-            'person_age': np.random.randint(20, 65, 1000),
-            'person_income': np.random.randint(40000, 120000, 1000),
-            'loan_amnt': np.random.randint(5000, 35000, 1000),
-            'Credit_Score': np.random.randint(500, 850, size=1000),
-            'loan_intent': np.random.choice(['PERSONAL', 'EDUCATION', 'MEDICAL', 'VENTURE'], 1000)
+            'person_age': np.random.randint(20, 65, rows_count),
+            'person_income': np.random.randint(40000, 120000, rows_count),
+            'loan_amnt': np.random.randint(5000, 35000, rows_count),
+            'Credit_Score': np.random.randint(500, 850, rows_count),
+            'loan_intent': np.random.choice(['PERSONAL', 'EDUCATION', 'MEDICAL', 'VENTURE'], rows_count)
         })
         provinces = ['Ontario', 'Quebec', 'British Columbia', 'Alberta', 'Manitoba', 'Saskatchewan']
         weights = [0.40, 0.23, 0.14, 0.11, 0.06, 0.06]
-        df['Province'] = np.random.choice(provinces, size=len(df), p=weights)
+        df['Province'] = np.random.choice(provinces, size=rows_count, p=weights)
         
         geo_coords = {
             'Ontario': (43.6532, -79.3832), 'Quebec': (45.5017, -73.5673),
@@ -93,9 +88,12 @@ def fetch_engineered_dataset():
             'Manitoba': (49.8951, -97.1384), 'Saskatchewan': (52.1332, -106.6700)
         }
         
-        # FIXED: Explicitly indexing tuple items [0] and [1] to calculate floating random values correctly
-        df['Latitude'] = df['Province'].map(lambda x: geo_coords[x][0] + np.random.uniform(-0.6, 0.6))
-        df['Longitude'] = df['Province'].map(lambda x: geo_coords[x][1] + np.random.uniform(-0.6, 0.6))
+        # Bypasses lambda functions completely to protect coordinates from parsing truncation errors
+        latitude_lookup = {k: v[0] for k, v in geo_coords.items()}
+        longitude_lookup = {k: v[1] for k, v in geo_coords.items()}
+        
+        df['Latitude'] = df['Province'].map(latitude_lookup) + np.random.uniform(-0.6, 0.6, size=rows_count)
+        df['Longitude'] = df['Province'].map(longitude_lookup) + np.random.uniform(-0.6, 0.6, size=rows_count)
         
         def calc_tier(score):
             if score >= 760: return 'Tier 1 - Super Prime'
@@ -124,10 +122,9 @@ target_risk = st.sidebar.multiselect(
     default=df['Risk_Segment'].unique()
 )
 
-# Compute runtime filtered dataset scoping matrix
 filtered_df = df[(df['Province'].isin(target_provinces)) & (df['Risk_Segment'].isin(target_risk))]
 
-# 4. Premium Web App Header with Structural Depth Protection
+# 4. Premium Web App Header
 st.markdown("""
     <div class='hero-banner' style='padding: 40px 30px; min-height: 160px; overflow: hidden; display: block;'>
         <div style='display: inline-block; background-color: rgba(255,255,255,0.18); padding: 6px 14px; border-radius: 20px; font-size: 11px; font-weight: bold; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 12px;'>
@@ -169,14 +166,10 @@ with tab_analytics:
 
         with col_left:
             st.markdown("### 🗺️ Geographic Asset Exposure Concentrations")
-            
-            # Regional postal two-letter code dictionary mapping
             prov_abbrev = {
                 'Ontario': 'ON', 'Quebec': 'QC', 'British Columbia': 'BC',
                 'Alberta': 'AB', 'Manitoba': 'MB', 'Saskatchewan': 'SK'
             }
-            
-            # Map aggregated positions coordinates out for text placement anchors
             label_df = filtered_df.groupby('Province')[['Longitude', 'Latitude']].mean().reset_index()
             label_df['Abbrev'] = label_df['Province'].map(prov_abbrev)
             
@@ -193,14 +186,7 @@ with tab_analytics:
                 data=label_df,
                 get_position='[Longitude, Latitude]',
                 get_text='Abbrev',
-                get_color=[255, 255, 255, 230],        
-                get_size=14,
-                get_alignment_baseline='"center"',
-                get_text_anchor='"middle"',
-                background_color=[30, 58, 138, 240],   
-                get_border_color=[59, 130, 246, 255],  
-                get_border_width=1,
-                padding=[6, 10, 6, 10],
+                get_size=16,
                 billboard=True
             )
             
@@ -220,3 +206,10 @@ with tab_analytics:
 
     else:
         m1.markdown("<div class='premium-card'><div class='card-label'>Active Pipelines</div><div class='card-value'>0</div></div>", unsafe_allow_html=True)
+        m2.markdown("<div class='premium-card'><div class='card-label'>Gross Capital Outlay</div><div class='card-value'>$0</div></div>", unsafe_allow_html=True)
+        m3.markdown("<div class='premium-card'><div class='card-label'>Weighted Credit Mean</div><div class='card-value'>N/A</div></div>", unsafe_allow_html=True)
+        m4.markdown("<div class='premium-card'><div class='card-label'>Debt-To-Income (DTI)</div><div class='card-value'>0.0%</div></div>", unsafe_allow_html=True)
+        
+        with col_left:
+            st.warning("⚠️ Active geographic parameters empty. Please select a Province to populate data layers.")
+        with col_right:
