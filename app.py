@@ -88,8 +88,8 @@ def fetch_engineered_dataset():
             'Manitoba': (49.8951, -97.1384), 'Saskatchewan': (52.1332, -106.6700)
         }
         
-        latitude_lookup = {k: v[0] for k, v in geo_coords.items()}
-        longitude_lookup = {k: v[1] for k, v in geo_coords.items()}
+        latitude_lookup = {k: v for k, v in geo_coords.items()}
+        longitude_lookup = {k: v for k, v in geo_coords.items()}
         
         df['Latitude'] = df['Province'].map(latitude_lookup) + np.random.uniform(-0.6, 0.6, size=rows_count)
         df['Longitude'] = df['Province'].map(longitude_lookup) + np.random.uniform(-0.6, 0.6, size=rows_count)
@@ -144,7 +144,6 @@ tab_analytics, tab_market, tab_export = st.tabs(["ðŸ“Š Executive Dashboard", "ðŸ
 with tab_analytics:
     # 6. Grid Layout for Dynamic KPI Metric Cards
     m1, m2, m3, m4 = st.columns(4)
-
     st.markdown("<br>", unsafe_allow_html=True)
 
     # Split-Screen Core Visualizations Layout
