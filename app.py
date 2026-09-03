@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 import pydeck as pdk
+import os
+import numpy as np
 
 # 1. Page Configuration & Aesthetic Theme Layout
 st.set_page_config(layout="wide", page_title="Canadian Banking Analytics Portal", page_icon="🇨🇦")
@@ -58,10 +60,31 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# 2. Performance Optimized Data Layer
+# 2. Performance Optimized Data Layer with Classroom Fallback
 @st.cache_data
 def fetch_engineered_dataset():
-    return pd.read_csv("data/clean_bank_data.csv")
+    data_path = "data/clean_bank_data.csv"
+    if os.path.exists(data_path):
+        return pd.read_csv(data_path)
+    else:
+        # Generate dummy data so your app functions flawlessly in class without the file
+        st.sidebar.warning("⚠️ Local dataset not found. Running on generated classroom sandbox data.")
+        np.random.seed(42)
+        provinces = ['ON', 'QC', 'BC', 'AB', 'MB', 'NS']
+        risk_tiers = ['Low', 'Medium', 'High']
+        intents = ['Mortgage', 'Personal', 'Debt Consolidation', 'Business']
+        
+        mock_data = pd.DataFrame({
+            'Province': np.random.choice(provinces, 200),
+            'Risk_Segment': np.random.choice(risk_tiers, 200),
+            'loan_amnt': np.random.randint(5000, 50000, 200),
+            'Credit_Score': np.random.randint(580, 850, 200),
+            'DTI_Ratio': np.random.uniform(0.1, 0.5, 200),
+            'loan_intent': np.random.choice(intents, 200),
+            'Latitude': np.random.uniform(43.0, 55.0, 200),
+            'Longitude': np.random.uniform(-120.0, -70.0, 200)
+        })
+        return mock_data
 
 df = fetch_engineered_dataset()
 
@@ -105,7 +128,6 @@ tab_analytics, tab_market, tab_export = st.tabs(["📊 Executive Dashboard", "�
 with tab_analytics:
     # 6. Grid Layout for Dynamic KPI Metric Cards
     m1, m2, m3, m4 = st.columns(4)
-
     st.markdown("<br>", unsafe_allow_html=True)
 
     # Split-Screen Core Visualizations Layout
@@ -179,18 +201,3 @@ with tab_market:
             <div class='image-caption-box' style='border-left-color: #EF4444;'>
                 <div style='background: linear-gradient(135deg, #7F1D1D 0%, #EF4444 100%); height: 120px; border-radius: 8px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px;'>🛡️ Risk Mitigate</div>
                 <h4 style='margin: 0 0 5px 0; color:#EF4444; font-size: 18px;'>Volatility Stress Indexing</h4>
-                <p style='margin: 0; color: #4B5563; font-size: 14px; line-height: 1.5;'>Hedges subprime concentration vectors dynamically to insulate capital books from macroeconomic trends.</p>
-            </div>
-        """, unsafe_allow_html=True)
-
-with tab_export:
-    st.markdown("### 📥 Archive & Export Portal")
-    st.markdown("Extract current filtered states as structured compliance audit assets.")
-    
-    csv_buffer = filtered_df.to_csv(index=False).encode('utf-8')
-    st.download_button(
-        label="📥 Download Structured Risk Portfolio State (CSV)",
-        data=csv_buffer,
-        file_name="filtered_canadian_banking_manifest.csv",
-        mime="text/csv"
-    )
