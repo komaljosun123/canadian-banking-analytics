@@ -7,9 +7,16 @@ import os
 # 1. Page Configuration & Aesthetic Theme Layout
 st.set_page_config(layout="wide", page_title="Canadian Banking Analytics Portal", page_icon="🇨🇦")
 
-# Custom CSS Injector for modern webpage layout
+# Custom CSS Injector for modern webpage layout & Fork Protection
 st.markdown("""
     <style>
+        /* CRITICAL SECURITY OVERRIDE: Hides the Fork/Options toolbar entirely */
+        #MainMenu, footer, header, [data-testid="stToolbar"], .stDeployButton, [data-testid="stDecoration"] {
+            display: none !important;
+            visibility: hidden !important;
+            height: 0px !important;
+        }
+        
         /* Main Webpage Font Smoothness & Clean Background */
         .main {
             background-color: #FAFAFB;
@@ -86,8 +93,8 @@ def fetch_engineered_dataset():
             'Manitoba': (49.8951, -97.1384), 'Saskatchewan': (52.1332, -106.6700)
         }
         
-        df['Latitude'] = df['Province'].map(lambda x: geo_coords[x][0] + np.random.uniform(-0.6, 0.6))
-        df['Longitude'] = df['Province'].map(lambda x: geo_coords[x][1] + np.random.uniform(-0.6, 0.6))
+        df['Latitude'] = df['Province'].map(lambda x: geo_coords[x] + np.random.uniform(-0.6, 0.6))
+        df['Longitude'] = df['Province'].map(lambda x: geo_coords[x] + np.random.uniform(-0.6, 0.6))
         
         def calc_tier(score):
             if score >= 760: return 'Tier 1 - Super Prime'
@@ -189,10 +196,10 @@ with tab_analytics:
                 get_size=14,
                 get_alignment_baseline='"center"',
                 get_text_anchor='"middle"',
-                background_color=[255, 255, 255, 220],
-                get_border_color=[180, 180, 180, 255],
+                background_color=[255, 255, 255, 210],
+                get_border_color=[190, 24, 74, 0],
                 get_border_width=1,
-                padding=[6, 10, 6, 10],
+                padding=[6, 6, 6, 6],
                 billboard=True
             )
             
@@ -212,5 +219,3 @@ with tab_analytics:
 
     else:
         m1.markdown("<div class='premium-card'><div class='card-label'>Active Pipelines</div><div class='card-value'>0</div></div>", unsafe_allow_html=True)
-        m2.markdown("<div class='premium-card'><div class='card-label'>Gross Capital Outlay</div><div class='card-value'>$0</div></div>", unsafe_allow_html=True)
-        m3.markdown("<div class='premium-card'><div class='card-label'>Weighted Credit Mean</div><div class='card-value'>N/A</div></div>", unsafe_allow_html=True)
