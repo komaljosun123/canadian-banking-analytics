@@ -93,8 +93,9 @@ def fetch_engineered_dataset():
             'Manitoba': (49.8951, -97.1384), 'Saskatchewan': (52.1332, -106.6700)
         }
         
-        df['Latitude'] = df['Province'].map(lambda x: geo_coords[x] + np.random.uniform(-0.6, 0.6))
-        df['Longitude'] = df['Province'].map(lambda x: geo_coords[x] + np.random.uniform(-0.6, 0.6))
+        # CORRECTED: Added [0] and [1] index locations to unpack latitude and longitude coordinates safely
+        df['Latitude'] = df['Province'].map(lambda x: geo_coords[x][0] + np.random.uniform(-0.6, 0.6))
+        df['Longitude'] = df['Province'].map(lambda x: geo_coords[x][1] + np.random.uniform(-0.6, 0.6))
         
         def calc_tier(score):
             if score >= 760: return 'Tier 1 - Super Prime'
@@ -196,10 +197,10 @@ with tab_analytics:
                 get_size=14,
                 get_alignment_baseline='"center"',
                 get_text_anchor='"middle"',
-                background_color=[255, 255, 255, 210],
-                get_border_color=[190, 24, 74, 0],
+                background_color=[255, 255, 255, 220],
+                get_border_color=[107, 114, 128, 255],
                 get_border_width=1,
-                padding=[6, 6, 6, 6],
+                padding=[6, 10, 6, 10],
                 billboard=True
             )
             
