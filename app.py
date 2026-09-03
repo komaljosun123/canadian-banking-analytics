@@ -93,8 +93,9 @@ def fetch_engineered_dataset():
             'Manitoba': (49.8951, -97.1384), 'Saskatchewan': (52.1332, -106.6700)
         }
         
+        # FIXED: Explicitly indexing tuple items [0] and [1] to calculate floating random values correctly
         df['Latitude'] = df['Province'].map(lambda x: geo_coords[x][0] + np.random.uniform(-0.6, 0.6))
-        df['Longitude'] = df['Province'].map(lambda x: geo_coords[x] + np.random.uniform(-0.6, 0.6))
+        df['Longitude'] = df['Province'].map(lambda x: geo_coords[x][1] + np.random.uniform(-0.6, 0.6))
         
         def calc_tier(score):
             if score >= 760: return 'Tier 1 - Super Prime'
@@ -187,20 +188,19 @@ with tab_analytics:
                 pickable=True,
             )
             
-            # FIXED: Added fallback explicit values so they never blank out or throw compilation syntax errors
             text_layer = pdk.Layer(
                 'TextLayer',
                 data=label_df,
                 get_position='[Longitude, Latitude]',
                 get_text='Abbrev',
-                get_color=[255, 255, 255, 255],        
+                get_color=[255, 255, 255, 230],        
                 get_size=14,
                 get_alignment_baseline='"center"',
                 get_text_anchor='"middle"',
-                background_color=[30, 58, 138, 255],   
+                background_color=[30, 58, 138, 240],   
                 get_border_color=[59, 130, 246, 255],  
                 get_border_width=1,
-                padding=[10, 14, 10, 14],
+                padding=[6, 10, 6, 10],
                 billboard=True
             )
             
