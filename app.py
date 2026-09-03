@@ -74,12 +74,12 @@ def fetch_engineered_dataset():
     if os.path.exists(target_path):
         return pd.read_csv(target_path)
     else:
-        # Fallback Data Generator Engine if file is missing in Repository
+        # Fallback Data Generator Engine matching your ETL script properties if pipeline hasn't run
         np.random.seed(42)
         df = pd.DataFrame({
             'person_age': np.random.randint(20, 65, 1000),
-            'person_income': np.random.randint(35000, 140000, 1000),
-            'loan_amnt': np.random.randint(5000, 42000, 1000),
+            'person_income': np.random.randint(40000, 120000, 1000),
+            'loan_amnt': np.random.randint(5000, 35000, 1000),
             'Credit_Score': np.random.randint(500, 850, size=1000),
             'loan_intent': np.random.choice(['PERSONAL', 'EDUCATION', 'MEDICAL', 'VENTURE'], 1000)
         })
@@ -93,7 +93,6 @@ def fetch_engineered_dataset():
             'Manitoba': (49.8951, -97.1384), 'Saskatchewan': (52.1332, -106.6700)
         }
         
-        # CORRECTED: Added [0] and [1] index locations to unpack latitude and longitude coordinates safely
         df['Latitude'] = df['Province'].map(lambda x: geo_coords[x][0] + np.random.uniform(-0.6, 0.6))
         df['Longitude'] = df['Province'].map(lambda x: geo_coords[x][1] + np.random.uniform(-0.6, 0.6))
         
@@ -103,7 +102,7 @@ def fetch_engineered_dataset():
             elif score >= 600: return 'Tier 3 - Near Prime'
             return 'Tier 4 - Subprime'
         df['Risk_Segment'] = df['Credit_Score'].apply(calc_tier)
-        df['DTI_Ratio'] = (df['loan_amnt'] / df['person_income']).round(3)
+        df['DTI_Ratio'] = np.where(df['person_income'] > 0, (df['loan_amnt'] / df['person_income']).round(3), 0.0)
         return df
 
 df = fetch_engineered_dataset()
@@ -198,9 +197,9 @@ with tab_analytics:
                 get_alignment_baseline='"center"',
                 get_text_anchor='"middle"',
                 background_color=[255, 255, 255, 220],
-                get_border_color=[107, 114, 128, 255],
+                get_border_color=[180, 180, 180, 255],
                 get_border_width=1,
-                padding=[6, 10, 6, 10],
+                padding=[6, 6, 6, 6],
                 billboard=True
             )
             
