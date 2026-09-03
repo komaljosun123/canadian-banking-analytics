@@ -40,15 +40,22 @@ def fetch_engineered_dataset():
         return pd.read_csv("data/clean_bank_data.csv")
     except FileNotFoundError:
         import numpy as np
+        
+        # Complete list of Canadian Provinces and Territories
+        all_provinces = ['ON', 'QC', 'BC', 'AB', 'MB', 'SK', 'NS', 'NB', 'NL', 'PE', 'NT', 'YT', 'NU']
+        
+        # Restored the 4 original Underwriting Risk Tiers from the initial build
+        four_risk_tiers = ['Tier 1', 'Tier 2', 'Tier 3', 'Tier 4']
+        
         return pd.DataFrame({
-            'Province': np.random.choice(['ON', 'BC', 'AB', 'QC'], 100),
-            'Risk_Segment': np.random.choice(['Low', 'Medium', 'High'], 100),
-            'loan_amnt': np.random.randint(10000, 50000, 100),
-            'Credit_Score': np.random.randint(600, 850, 100),
-            'DTI_Ratio': np.random.uniform(0.1, 0.5, 100),
-            'Latitude': np.random.uniform(49.0, 55.0, 100),
-            'Longitude': np.random.uniform(-125.0, -70.0, 100),
-            'loan_intent': np.random.choice(['PERSONAL', 'EDUCATION', 'MEDICAL', 'VENTURE'], 100)
+            'Province': np.random.choice(all_provinces, 150),
+            'Risk_Segment': np.random.choice(four_risk_tiers, 150),
+            'loan_amnt': np.random.randint(10000, 75000, 150),
+            'Credit_Score': np.random.randint(580, 850, 150),
+            'DTI_Ratio': np.random.uniform(0.05, 0.60, 150),
+            'Latitude': np.random.uniform(45.0, 62.0, 150),
+            'Longitude': np.random.uniform(-135.0, -60.0, 150),
+            'loan_intent': np.random.choice(['PERSONAL', 'EDUCATION', 'MEDICAL', 'VENTURE', 'HOME_IMPROVEMENT'], 150)
         })
 
 df = fetch_engineered_dataset()
@@ -57,6 +64,7 @@ df = fetch_engineered_dataset()
 st.sidebar.markdown("### 🕹️ Governance Control Center")
 st.sidebar.info("Slice and dice the real-time loan book metrics below.")
 
+# Filter accurately reflecting all options contained in the dataset
 target_provinces = st.sidebar.multiselect(
     "📍 Select Geographic Scope", 
     options=sorted(df['Province'].unique()), 
