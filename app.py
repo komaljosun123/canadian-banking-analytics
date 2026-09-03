@@ -213,4 +213,3 @@ with tab_analytics:
         with col_right:
             st.warning("⚠️ Portfolio stream paused. Restore parameters in control deck to analyze graphs.")
 
-with tab_market:
